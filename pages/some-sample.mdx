@@ -1,0 +1,164 @@
+---
+title: Some sample
+---
+
+**Last Updated:** 12/1/2025
+
+---
+
+# Getting Started with TS-Pattern
+
+TS-Pattern is a lightweight (~2kB) pattern matching library for TypeScript that provides type-safe, exhaustive matching with smart type inference.
+
+## Installation
+
+Install via your preferred package manager:
+
+```bash
+npm install ts-pattern
+# or
+pnpm add ts-pattern
+# or
+yarn add ts-pattern
+# or
+bun add ts-pattern
+```
+
+## Basic Usage
+
+Import `match` and `P` (pattern helpers) from the library:
+
+```ts
+import { match, P } from 'ts-pattern';
+```
+
+### Simple Example
+
+Match on values and execute corresponding handlers:
+
+```ts
+const result = match(value)
+  .with('hello', () => 'greeting')
+  .with(42, () => 'the answer')
+  .with(P.string, (str) => `string: ${str}`)
+  .with(P.number, (num) => `number: ${num}`)
+  .otherwise(() => 'unknown');
+```
+
+### Matching Objects
+
+Pattern match on discriminated unions:
+
+```ts
+type Result =
+  | { type: 'success'; data: string }
+  | { type: 'error'; error: Error };
+
+const message = match(result)
+  .with({ type: 'success' }, ({ data }) => `Success: ${data}`)
+  .with({ type: 'error' }, ({ error }) => `Error: ${error.message}`)
+  .exhaustive();
+```
+
+## Key Features
+
+### Exhaustive Checking
+
+Use `.exhaustive()` to ensure all cases are handled at compile-time:
+
+```ts
+type Status = 'idle' | 'loading' | 'success' | 'error';
+
+const getLabel = (status: Status) =>
+  match(status)
+    .with('idle', () => 'Idle')
+    .with('loading', () => 'Loading...')
+    .with('success', () => 'Done!')
+    .with('error', () => 'Failed')
+    .exhaustive(); // ✅ TypeScript verifies all cases covered
+```
+
+### Selecting Values
+
+Extract specific values using `P.select()`:
+
+```ts
+const result = match(data)
+  .with({ type: 'user', name: P.select() }, (name) => `Hello ${name}`)
+  .with({ type: 'post', title: P.select('title'), author: P.select('author') },
+    ({ title, author }) => `${title} by ${author}`)
+  .otherwise(() => 'unknown');
+```
+
+### Wildcards
+
+Use pattern wildcards for flexible matching:
+
+```ts
+match(value)
+  .with(P.string, () => 'any string')
+  .with(P.number, () => 'any number')
+  .with(P.boolean, () => 'any boolean')
+  .with(P._, () => 'anything else')
+  .exhaustive();
+```
+
+### Guards and Predicates
+
+Add custom conditions with `P.when()`:
+
+```ts
+match(user)
+  .with({ age: P.number.gte(18) }, () => 'adult')
+  .with({ age: P.number.lt(18) }, () => 'minor')
+  .exhaustive();
+```
+
+### Negation
+
+Match everything except a specific pattern:
+
+```ts
+match(value)
+  .with(P.not(null), (val) => `Value: ${val}`)
+  .otherwise(() => 'null value');
+```
+
+## Common Patterns
+
+### Arrays
+
+```ts
+match(items)
+  .with([], () => 'empty')
+  .with([P.string], (arr) => `one string: ${arr[0]}`)
+  .with(P.array(P.number), (nums) => `numbers: ${nums.join(',')}`)
+  .otherwise(() => 'other');
+```
+
+### Type Guards
+
+Validate unknown data:
+
+```ts
+import { isMatching } from 'ts-pattern';
+
+const userPattern = {
+  name: P.string,
+  age: P.number,
+  email: P.string
+};
+
+if (isMatching(userPattern, data)) {
+  // data is now typed as { name: string; age: number; email: string }
+  console.log(data.name);
+}
+```
+
+## Next Steps
+
+- Explore the [full documentation](https://github.com/gvergnaud/ts-pattern) for advanced patterns
+- Try the [interactive examples](https://stackblitz.com/edit/vitejs-vite-qrk8po?file=src%2Fexamples%2Fbasic.tsx)
+- Learn about `P.union`, `P.intersection`, `P.instanceOf`, and more
+
+Pattern matching makes complex conditional logic more readable and type-safe. Start simple and gradually adopt more advanced features as needed!
