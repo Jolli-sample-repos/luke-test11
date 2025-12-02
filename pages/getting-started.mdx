@@ -1,0 +1,112 @@
+---
+title: Getting Started
+---
+
+**Last Updated:** 12/2/2025
+
+---
+
+## Quick Example
+
+Here's a taste of what ts-pattern looks like in action:
+
+```typescript
+import { match, P } from 'ts-pattern';
+
+type Data =
+  | { type: 'text'; content: string }
+  | { type: 'img'; src: string };
+
+type Result =
+  | { type: 'ok'; data: Data }
+  | { type: 'error'; error: Error };
+
+const result: Result = ...;
+
+const html = match(result)
+  .with({ type: 'error' }, () => <p>Oups! An error occured</p>)
+  .with({ type: 'ok', data: { type: 'text' } }, (res) => <p>{res.data.content}</p>)
+  .with({ type: 'ok', data: { type: 'img', src: P.select() } }, (src) => <img src={src} />)
+  .exhaustive();
+```
+
+*Source: [ts-pattern README](https://github.com/gvergnaud/ts-pattern/blob/main/README.md)*
+
+## About
+
+Write **better** and **safer conditions**. Pattern matching lets you express complex conditions in a single, compact expression. Your code becomes **shorter** and **more readable**. Exhaustiveness checking ensures you haven't forgotten **any possible case**.
+
+![ts-pattern](https://user-images.githubusercontent.com/9265418/231688650-7cd957a9-8edc-4db8-a5fe-61e1c2179d91.gif)
+
+<p align="center"><i>Animation by <a target="_blank" href="https://twitter.com/nicoespeon/status/1644342570389061634?s=20">@nicoespeon</a></i></p>
+
+## Why ts-pattern?
+
+Traditional `switch` statements and `if/else` chains have limitations:
+- No exhaustiveness checking
+- Verbose when matching on object properties
+- Can't match on complex nested structures
+- No type narrowing in handlers
+
+ts-pattern solves these problems while maintaining excellent TypeScript integration and a tiny bundle size.
+
+## Features
+
+- Pattern-match on **any data structure**: nested [Objects](#objects), [Arrays](#tuples-arrays), [Tuples](#tuples-arrays), [Sets](#pset-patterns), [Maps](#pmap-patterns), [Records](#precord-patterns) and all primitive types.
+- **Typesafe**, with helpful [type inference](#type-inference).
+- **Exhaustiveness checking** support, enforcing that you are matching every possible case with [`.exhaustive()`](#exhaustive).
+- Use [patterns](#patterns) to **validate** the shape of your data with [`isMatching`](#ismatching).
+- **Expressive API**, with catch-all and type specific **wildcards**: [`P._`](#p_-wildcard), [`P.string`](#pstring-wildcard), [`P.number`](#pnumber-wildcard), etc.
+- Supports [**predicates**](#pwhen-patterns), [**unions**](#punion-patterns), [**intersections**](#pintersection-patterns) and [**exclusion**](#pnot-patterns) patterns for non-trivial cases.
+- Match on **Record types** with [`P.record`](#precord-patterns) for consistent key-value structures.
+- Use [`.narrow()`](#narrow) to progressively narrow input types for better exhaustiveness checking.
+- Supports properties selection, via the [`P.select(name?)`](#pselect-patterns) function.
+- Tiny bundle footprint ([**only ~2kB**](https://bundlephobia.com/package/ts-pattern)).
+
+*Current version: **5.9.0** | [View on GitHub](https://github.com/gvergnaud/ts-pattern)*
+
+## What is Pattern Matching?
+
+[Pattern Matching](https://en.wikipedia.org/wiki/Pattern_matching) is a code-branching technique coming from functional programming languages that's more powerful and often less verbose than imperative alternatives (if/else/switch statements), especially for complex conditions.
+
+Pattern Matching is implemented in Python, Rust, Swift, Elixir, Haskell and many other languages. There is [a tc39 proposal](https://github.com/tc39/proposal-pattern-matching) to add Pattern Matching to EcmaScript, though it will take time before it's standardized and widely available. In the meantime, ts-pattern provides a production-ready, typesafe pattern matching implementation you can use today.
+
+Read the introduction blog post: [Bringing Pattern Matching to TypeScript 🎨 Introducing TS-Pattern](https://dev.to/gvergnaud/bringing-pattern-matching-to-typescript-introducing-ts-pattern-v3-0-o1k)
+
+## Installation
+
+**Requirements:** TypeScript 5.0 or higher
+
+Via npm:
+
+```sh
+npm install ts-pattern
+```
+
+You can also use your favorite package manager:
+
+```sh
+pnpm add ts-pattern
+# OR
+yarn add ts-pattern
+# OR
+bun add ts-pattern
+# OR
+npx jsr add @gabriel/ts-pattern
+```
+
+*Note: TypeScript 5+ is required. If you're upgrading from v4, see the [migration guide](https://github.com/gvergnaud/ts-pattern/blob/main/docs/v4-to-v5-migration-guide.md).*
+
+## Try it Online
+
+Want to experiment with ts-pattern right away? Check out these interactive examples:
+
+- [**Basic Demo**](https://stackblitz.com/edit/vitejs-vite-qrk8po?file=src%2Fexamples%2Fbasic.tsx) - Core pattern matching features
+- [**React GIF Fetcher**](https://stackblitz.com/edit/ts-pattern-gifs?file=src%2FApp.tsx) - Real-world app example
+- [**React.useReducer Demo**](https://stackblitz.com/edit/ts-pattern-reducer?file=src%2FApp.tsx) - State management patterns
+
+*Source: [ts-pattern sandbox examples](https://github.com/gvergnaud/ts-pattern/blob/main/README.md#sandbox-examples)*
+
+## Want to become a TypeScript Expert?
+
+Check out 👉 [Type-Level TypeScript](https://type-level-typescript.com/), an online course teaching you how to unleash the full potential of TypeScript's Turing-complete type system. You already know how to code, and types are simply another programming language to master. This course **bridges the gap**, helping you apply your **existing programming knowledge** to **TypeScript's type system**, so you never again struggle with type errors or feel unable to type complex generic code correctly!
